@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import cv2
 
 
-def createDataFrame():
+def createDataFrame()->pd.DataFrame:
+    '''This function takes data from 2 csv files and create dataframe with 2 columns'''
     df1 = pd.read_csv("D:\\rtfiles\\rose.csv", sep=',',
                       header=None, encoding='UTF-16')
     df2 = pd.read_csv("D:\\rtfiles\\tulip.csv", sep=',',
@@ -16,6 +17,7 @@ def createDataFrame():
 
 
 def add_mark(df: pd.DataFrame) -> None:
+    '''This function adds third column in dataframe - mark of image(1 or 0)'''
     value = []
     for item in df['DatasetClass']:
         if item == 'rose':
@@ -26,6 +28,7 @@ def add_mark(df: pd.DataFrame) -> None:
 
 
 def add_hwcColumns(df: pd.DataFrame) -> None:
+    '''This function adds to dataframe 3 columns: height, width and channels of the image'''
     img_width = []
     img_height = []
     img_channel = []
@@ -40,55 +43,56 @@ def add_hwcColumns(df: pd.DataFrame) -> None:
 
 
 def mark_filter(df: pd.DataFrame, class_mark: int) -> pd.DataFrame:
+    '''This function selects all images with mark and returns them'''
     return df[df['mark'] == class_mark]
 
 
 def whm_filter(df: pd.DataFrame, class_mark: int, max_width: int, max_height: int) -> pd.DataFrame:
+    '''This function selects all images with width and height less given and the same mark and returns them'''
     return df[(df.mark == class_mark) & (df.height <= max_height) & (df.width <= max_width)]
 
 
-def group_mp(df: pd.DataFrame, class_mark: int) -> pd.DataFrame:
+def group_mp(df: pd.DataFrame, class_mark: int) -> None:
+    '''This function groops dataframe by new column (number of pixels) and shows information about that'''
     df = mark_filter(df, class_mark)
     img_pixels = []
     for item in df['AbsolutePath']:
         img = cv2.imread(item)
         img_pixels.append(img.size)
     df['pixels'] = img_pixels
-
-    df_res = df.groupby('pixels').count()
-    return df_res
+    df.groupby('pixels').count()
+    print(df.pixels.describe())
 
 
 def create_histogram(df: pd.DataFrame, class_mark: int) -> list:
+    '''This function creates histogram and returns it'''
     df = mark_filter(df, class_mark)
     df = df.sample()
     for item in df['AbsolutePath']:
         path = item
     img = cv2.imread(path)
     array = []
-    for number in range(0,3):  #blue green red
-        hist = cv2.calcHist([img], [number], None, [256], [0,256])
+    for number in range(0, 3):  # blue green reds
+        hist = cv2.calcHist([img], [number], None, [256], [0, 256])
         array.append(hist)
     return array
 
 
-def histogram_rendering(df: pd.DataFrame, class_mark: int)->None:
+def histogram_rendering(df: pd.DataFrame, class_mark: int) -> None:
+    '''This function draws histogram'''
     hist = create_histogram(df, class_mark)
-    plt.plot(hist[0], color = 'b')
-    plt.plot(hist[1], color = 'g')
-    plt.plot(hist[2], color = 'r')
-    plt.title('Image Histogram For Blue, Green, Red Channel GFG')
+    plt.plot(hist[0], color='b')
+    plt.plot(hist[1], color='g')
+    plt.plot(hist[2], color='r')
+    plt.title('Image Histogram For Blue, Green, Red Channels')
     plt.xlabel("Intensity")
     plt.ylabel("Number of pixels")
     plt.show()
 
-    
 
-
-df = createDataFrame()
-add_mark(df)
-add_hwcColumns(df)
-# print(group_mp(df, 1))
-# print(df.describe())
-# create_histogram(df, 1)
-histogram_rendering(df, 1)
+if __name__ == '__main__':
+    df = createDataFrame()
+    add_mark(df)
+    add_hwcColumns(df)
+    group_mp(df, 1)
+    histogram_rendering(df, 1)
