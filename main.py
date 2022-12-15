@@ -1,14 +1,16 @@
+from typing import List
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
 
-def createDataFrame()->pd.DataFrame:
+def createDataFrame() -> pd.DataFrame:
     '''This function takes data from 2 csv files and create dataframe with 2 columns'''
-    df1 = pd.read_csv("D:\\rtfiles\\rose.csv", sep=',',
+    df1 = pd.read_csv(r"D:\rtfiles\rose.csv", sep=',',
                       header=None, encoding='UTF-16')
-    df2 = pd.read_csv("D:\\rtfiles\\tulip.csv", sep=',',
+    df2 = pd.read_csv(r"D:\rtfiles\tulip.csv", sep=',',
                       header=None, encoding='UTF-16')
     df = pd.concat([df1, df2], ignore_index=True)
     df.drop(1, axis=1, inplace=True)
@@ -64,7 +66,7 @@ def group_mp(df: pd.DataFrame, class_mark: int) -> None:
     print(df.pixels.describe())
 
 
-def create_histogram(df: pd.DataFrame, class_mark: int) -> list:
+def create_histogram(df: pd.DataFrame, class_mark: int) -> List[np.ndarray]:
     '''This function creates histogram and returns it'''
     df = mark_filter(df, class_mark)
     df = df.sample()
